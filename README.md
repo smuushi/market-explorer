@@ -1,6 +1,6 @@
 # Parity — a Polymarket ⇄ Kalshi explorer
 
-**Live demo:** _add your Vercel URL here after deploying_
+**Live demo:** [market-explorer-smoky.vercel.app](https://market-explorer-smoky.vercel.app)
 **Author:** [Michael Shih](https://github.com/smuushi)
 
 ## Why I built this
