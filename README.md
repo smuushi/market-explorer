@@ -1,6 +1,6 @@
-# Parity — a Polymarket ⇄ Kalshi explorer
+# PolyComparison — a Polymarket ⇄ Kalshi explorer
 
-**Live demo:** [market-explorer-smoky.vercel.app](https://market-explorer-smoky.vercel.app)
+**Live demo:** [polycomparison.app](https://polycomparison.app)
 **Author:** [Michael Shih](https://github.com/smuushi)
 
 ## Why I built this
@@ -11,9 +11,9 @@ moderation service Polymarket runs today for community trust & safety — so I w
 something that shows the kind of software I'd actually build there, not just talk about it.
 
 Polymarket and Kalshi both run public, unauthenticated market-data APIs, but there's no easy way to
-put the same real-world question side by side across both venues. Parity is a small, on-demand
-explorer that does exactly that: paste a link, get an instant comparison — in the spirit of an
-Etherscan or CoinMarketCap page, but for prediction markets.
+put the same real-world question side by side across both venues. PolyComparison is a small,
+on-demand explorer that does exactly that: paste a link, get an instant comparison — in the spirit
+of an Etherscan or CoinMarketCap page, but for prediction markets.
 
 ## What it does
 

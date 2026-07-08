@@ -21,13 +21,13 @@ export default function Home() {
           <div className="flex items-center gap-2 text-sm font-medium text-muted">
             <Image
               src="/logo.png"
-              alt="Parity logo"
+              alt="PolyComparison logo"
               width={20}
               height={20}
               className="rounded-md"
               priority
             />
-            Parity
+            PolyComparison
           </div>
           <h1
             className={cn(
@@ -39,9 +39,9 @@ export default function Home() {
           </h1>
           {hasResults ? null : (
             <p className="max-w-xl text-sm text-muted">
-              Paste a Polymarket or Kalshi market link. Parity fetches live pricing, volume, and
-              liquidity, then finds the equivalent market on the other platform for an instant
-              side-by-side comparison.
+              Paste a Polymarket or Kalshi market link. PolyComparison fetches live pricing,
+              volume, and liquidity, then finds the equivalent market on the other platform for an
+              instant side-by-side comparison.
             </p>
           )}
         </div>

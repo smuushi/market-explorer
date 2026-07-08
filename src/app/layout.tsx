@@ -12,10 +12,27 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL = "https://polycomparison.app";
+const SITE_TITLE = "PolyComparison — Polymarket vs Kalshi Explorer";
+const SITE_DESCRIPTION =
+  "Paste a Polymarket or Kalshi market link and get an instant side-by-side comparison of price, volume, and liquidity across both platforms.";
+
 export const metadata: Metadata = {
-  title: "Parity — Polymarket vs Kalshi Explorer",
-  description:
-    "Paste a Polymarket or Kalshi market link and get an instant side-by-side comparison of price, volume, and liquidity across both platforms.",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: "PolyComparison",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({
