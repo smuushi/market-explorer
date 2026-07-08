@@ -17,6 +17,10 @@ application — keep it simple, fast, and obviously well-crafted rather than fea
 - This is a portfolio piece, not a product with a roadmap of committed features. Prefer small,
   polished, easy-to-explain changes over ambitious ones. See "Roadmap" in `README.md` for ideas
   that are explicitly **out of scope** for now — don't build those unprompted.
+- If you *are* asked to implement a roadmap item, read its design doc in
+  [`docs/roadmap/`](./docs/roadmap/) first (start from `docs/roadmap/README.md` for the dependency
+  map) — each one covers the proposed data model, architecture, and open decisions in more depth
+  than the one-line README bullet.
 - No database, no auth, no user accounts. Everything is fetched live, on-demand, from public
   Polymarket and Kalshi APIs. Keep it that way unless the user explicitly asks to change the
   architecture.

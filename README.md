@@ -116,36 +116,42 @@ Open [http://localhost:3000](http://localhost:3000). No environment variables ar
 ## Roadmap / out of scope for this MVP
 
 This is deliberately an on-demand tool, not a crawler, to keep the deploy simple (pure Vercel, no
-database). The natural next steps if this became a real product:
+database). The natural next steps if this became a real product are written up as implementation
+specs in [`docs/roadmap/`](./docs/roadmap/) — start with
+[the always-on crawler doc](./docs/roadmap/infra-01-always-on-crawler.md), since everything else
+below depends on it.
 
 ### Infrastructure — move from on-demand to always-on
 
-- A Cloudflare Worker on a cron trigger that periodically crawls both platforms' trending markets
-  into KV or D1, powering a searchable/browsable homepage instead of requiring a pasted link.
-- Stored historical snapshots (not just the ~7-day window each API exposes) for longer-range price
-  history and volume trend charts.
-- Persisted matched pairs, so the heuristic/AI matching cost is paid once per pair instead of once
-  per page load.
+- [A Cloudflare Worker on a cron trigger](./docs/roadmap/infra-01-always-on-crawler.md) that
+  periodically crawls both platforms' trending markets into D1, powering a searchable/browsable
+  homepage instead of requiring a pasted link.
+- [Stored historical snapshots](./docs/roadmap/infra-02-historical-snapshots.md) (not just the
+  ~7-day window each API exposes) for longer-range price history and volume trend charts.
+- [Persisted matched pairs](./docs/roadmap/infra-03-persisted-matched-pairs.md), so the
+  heuristic/AI matching cost is paid once per pair instead of once per page load.
 
 ### Alerts — surface disparities without having to go looking for them
 
-- Automated alerts (email/Discord/webhook) when a tracked pair's probability gap crosses a
-  configurable threshold, e.g. "notify me when Polymarket and Kalshi disagree by >5% on this
-  question."
-- A live "spread" leaderboard: matched pairs ranked by current probability gap, so the biggest
-  cross-platform disagreements surface on their own.
-- Gap-decay alerts — flag when a large disparity closes quickly, which is itself a signal that one
-  platform's price discovery lagged the other's.
+- [Automated alerts](./docs/roadmap/alerts-01-threshold-notifications.md) (email/Discord/webhook)
+  when a tracked pair's probability gap crosses a configurable threshold, e.g. "notify me when
+  Polymarket and Kalshi disagree by >5% on this question."
+- [A live "spread" leaderboard](./docs/roadmap/alerts-02-spread-leaderboard.md): matched pairs
+  ranked by current probability gap, so the biggest cross-platform disagreements surface on their
+  own.
+- [Gap-decay alerts](./docs/roadmap/alerts-03-gap-decay-alerts.md) — flag when a large disparity
+  closes quickly, which is itself a signal that one platform's price discovery lagged the other's.
 
 ### Analysis — go beyond a single snapshot
 
-- Which market "won" — for pairs that both reference the same real-world event with a hard
-  resolution moment (a Fed decision, an election call, a game result), compare timestamped price
-  history on each side to measure which platform's price moved to reflect the new information
-  first, and by how much lead time.
-- Comment/discussion comparison — Polymarket and Kalshi both have on-market discussion; surface
-  each platform's top comments side by side next to the matched pair, and (longer term) a rough
-  sentiment/consensus read of each side's discussion versus its own price.
-- Historical accuracy tracking — once a matched pair resolves, record which platform's pre-close
-  price was closer to the actual outcome, aggregated over time into a per-platform calibration
-  score.
+- [Which market "won"](./docs/roadmap/analysis-01-first-mover.md) — for pairs that both reference
+  the same real-world event with a hard resolution moment (a Fed decision, an election call, a
+  game result), compare timestamped price history on each side to measure which platform's price
+  moved to reflect the new information first, and by how much lead time.
+- [Comment/discussion comparison](./docs/roadmap/analysis-02-comment-comparison.md) — surface
+  Polymarket's on-market discussion next to a matched pair (Kalshi has no public discussion API
+  today, so this is currently one-sided — see the doc), and, longer term, a rough
+  sentiment/consensus read of discussion versus price.
+- [Historical accuracy tracking](./docs/roadmap/analysis-03-calibration-tracking.md) — once a
+  matched pair resolves, record which platform's pre-close price was closer to the actual outcome
+  (via Brier score), aggregated over time into a per-platform calibration score.
