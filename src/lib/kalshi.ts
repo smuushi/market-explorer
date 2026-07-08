@@ -321,7 +321,12 @@ async function fetchOpenEventsForSeries(
   return data?.events ?? [];
 }
 
-export async function searchKalshiMarkets(title: string, limit = 8): Promise<Market[]> {
+export interface ScoredMarket {
+  market: Market;
+  score: number;
+}
+
+export async function searchKalshiMarkets(title: string, limit = 8): Promise<ScoredMarket[]> {
   const categories = guessCategories(title);
   const seriesLists = await Promise.all(categories.map((category) => fetchSeriesForCategory(category)));
   const allSeries = seriesLists.flat();
@@ -351,5 +356,6 @@ export async function searchKalshiMarkets(title: string, limit = 8): Promise<Mar
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 
-  return Promise.all(ranked.map((entry) => normalizeMarket(entry.raw, entry.event, false)));
+  const markets = await Promise.all(ranked.map((entry) => normalizeMarket(entry.raw, entry.event, false)));
+  return markets.map((market, index) => ({ market, score: ranked[index].score }));
 }

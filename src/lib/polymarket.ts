@@ -203,7 +203,12 @@ export async function resolvePolymarketUrl(url: string): Promise<PolymarketResol
   return { market, alternates };
 }
 
-export async function searchPolymarketMarkets(query: string, limit = 8): Promise<Market[]> {
+export interface ScoredMarket {
+  market: Market;
+  score: number;
+}
+
+export async function searchPolymarketMarkets(query: string, limit = 8): Promise<ScoredMarket[]> {
   const url = `${GAMMA_BASE}/public-search?q=${encodeURIComponent(query)}&limit_per_type=${limit}`;
   const data = await fetchJson<{ events?: GammaEventRaw[] }>(url);
   if (!data?.events) return [];
@@ -222,5 +227,8 @@ export async function searchPolymarketMarkets(query: string, limit = 8): Promise
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 
-  return Promise.all(ranked.map((entry) => normalizeMarket(entry.raw, entry.eventFallback, false)));
+  const markets = await Promise.all(
+    ranked.map((entry) => normalizeMarket(entry.raw, entry.eventFallback, false)),
+  );
+  return markets.map((market, index) => ({ market, score: ranked[index].score }));
 }

@@ -63,6 +63,16 @@ export function tokenize(text: string): string[] {
  */
 export const MIN_MATCH_SIMILARITY = 0.15;
 
+/**
+ * At or above this score, trust the heuristic ranking outright (near-identical titles).
+ * Below it — but at/above MIN_MATCH_SIMILARITY — scores cluster too tightly to reliably
+ * tell a true match from a same-topic-different-question false positive (e.g. "will X
+ * drop out" vs "will X be endorsed" both mention the same people). That "ambiguous band"
+ * is where an LLM re-ranker earns its cost: real matches we've measured only reach ~0.25,
+ * so most genuine cases fall here, not above this bar.
+ */
+export const HIGH_CONFIDENCE_SIMILARITY = 0.5;
+
 /** Jaccard similarity between the token sets of two strings, in [0, 1]. */
 export function titleSimilarity(a: string, b: string): number {
   const setA = new Set(tokenize(a));

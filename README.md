@@ -57,18 +57,26 @@ short cache window, since both APIs are public and rate-limit-sensitive.
 
 ### Matching, honestly
 
-Neither platform's data schema knows about the other. Matching is a heuristic, not a guarantee:
+Neither platform's data schema knows about the other. Matching is a two-stage hybrid, not a
+guarantee:
 
-- **Kalshi → Polymarket**: uses Polymarket's `/public-search` endpoint directly (it already does
-  full-text search across events and markets).
-- **Polymarket → Kalshi**: Kalshi's API has no free-text search, so the app guesses a category from
-  keywords in the source title (e.g. "fed", "inflation" → Economics), fetches that category's
-  series, ranks series by title similarity, then fetches and ranks the open markets inside the
-  top series.
-- Ranking uses a dependency-free Jaccard token-overlap score (`lib/text.ts`) — no ML, no fuzzy-match
-  library, just intersection-over-union of significant words. It's good enough to surface the right
-  neighborhood of markets, and the UI always shows the next-best alternatives so you can pick the
-  right one yourself.
+1. **Heuristic shortlist (fast, free).** For Kalshi → Polymarket, this uses Polymarket's
+   `/public-search` endpoint directly. For Polymarket → Kalshi, Kalshi's API has no free-text
+   search, so the app guesses a category from keywords in the source title (e.g. "fed",
+   "inflation" → Economics), fetches that category's series, ranks series by title similarity,
+   then fetches and ranks the open markets inside the top series. Ranking uses a dependency-free
+   Jaccard token-overlap score (`lib/text.ts`) — ratio of shared significant words to total words.
+2. **AI re-ranker for ambiguous cases (`lib/ai-match.ts`).** Measured against real examples, a
+   genuinely correct cross-platform match usually only scores ~0.2–0.25 on that Jaccard score —
+   and a same-topic-but-different-question false positive (e.g. "will X drop out of the race" vs.
+   "will X be endorsed", which share every proper noun) can score close behind it. Token overlap
+   alone can't reliably tell those apart, so when the top heuristic score falls in that ambiguous
+   band, the shortlist is handed to a small model (`gpt-5.4-nano`, OpenAI) that reads the actual
+   titles and judges which candidate (if any) asks the same real-world question — only obviously
+   high-confidence matches skip the AI step entirely. If no `OPENAI_API_KEY` is configured, or the
+   call fails for any reason, matching falls back to the heuristic ranking rather than breaking.
+
+The UI always shows the next-best alternatives too, so you can override the pick either way.
 
 ## Tech stack
 
@@ -98,7 +106,9 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). No environment variables are required.
+Open [http://localhost:3000](http://localhost:3000). No environment variables are required — set
+`OPENAI_API_KEY` in `.env.local` to enable the AI re-ranker for ambiguous matches (see
+"Matching, honestly" above); without it, matching still works via the heuristic ranking alone.
 
 ## Roadmap / out of scope for this MVP
 
