@@ -1,7 +1,7 @@
 import { PlatformBadge } from "@/components/platform-badge";
 import { Card } from "@/components/ui/card";
 import type { Market } from "@/lib/types";
-import { formatDate, formatPercent, formatUsd, platformLabel } from "@/lib/utils";
+import { cn, formatDate, formatPercent, formatUsd, platformLabel } from "@/lib/utils";
 
 function daysBetween(a: string | null, b: string | null): number | null {
   if (!a || !b) return null;
@@ -40,7 +40,14 @@ export function DeltaStrip({ left, right }: { left: Market; right: Market }) {
   return (
     <Card className="flex flex-col gap-4 p-5">
       {betterOdds ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-kalshi/30 bg-kalshi/10 px-4 py-3">
+        <div
+          className={cn(
+            "flex flex-wrap items-center gap-2 rounded-lg border px-4 py-3",
+            betterOdds.cheaper.platform === "polymarket"
+              ? "border-polymarket/30 bg-polymarket/10"
+              : "border-kalshi/30 bg-kalshi/10",
+          )}
+        >
           <PlatformBadge platform={betterOdds.cheaper.platform} />
           <span className="text-sm text-foreground">
             offers the better odds to buy <span className="font-semibold">Yes</span> —{" "}
@@ -74,7 +81,7 @@ export function DeltaStrip({ left, right }: { left: Market; right: Market }) {
           <div className="text-xs text-muted">
             {volumeDiff === null
               ? "Unavailable"
-              : `More volume on ${volumeDiff >= 0 ? left.platform : right.platform}`}
+              : `More volume on ${platformLabel(volumeDiff >= 0 ? left.platform : right.platform)}`}
           </div>
         </div>
         <div>

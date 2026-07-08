@@ -34,7 +34,7 @@ export function MarketOptionPicker({ label, current, options, onSelect }: Market
               className={cn(
                 "flex max-w-[220px] items-center gap-2 rounded-full border px-3 py-1.5 text-left text-xs transition-colors",
                 isActive
-                  ? "border-foreground/50 bg-surface-hover text-foreground"
+                  ? "border-foreground/60 bg-surface-hover text-foreground ring-1 ring-foreground/20"
                   : "border-edge text-muted hover:border-foreground/30 hover:text-foreground",
               )}
             >
