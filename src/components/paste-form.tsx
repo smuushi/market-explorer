@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Loader2, RotateCcw, Search } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Check, Loader2, RotateCcw, Search, Share2 } from "lucide-react";
 
 import { CompareSkeleton, PanelSkeleton } from "@/components/compare-skeleton";
 import { CompareView } from "@/components/compare-view";
@@ -65,8 +66,14 @@ export function PasteForm({
 }: {
   onHasResultsChange?: (hasResults: boolean) => void;
 }) {
-  const [leftUrl, setLeftUrl] = useState("");
-  const [rightUrl, setRightUrl] = useState("");
+  const searchParams = useSearchParams();
+  const [sharedParams] = useState(() => ({
+    left: searchParams.get("left") ?? "",
+    right: searchParams.get("right") ?? "",
+  }));
+
+  const [leftUrl, setLeftUrl] = useState(() => sharedParams.left);
+  const [rightUrl, setRightUrl] = useState(() => sharedParams.right);
   const [status, setStatus] = useState<Status>("idle");
   const [loadingLabel, setLoadingLabel] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -74,12 +81,13 @@ export function PasteForm({
   const [right, setRight] = useState<Slot | null>(null);
   const [rightMode, setRightMode] = useState<"auto" | "manual" | null>(null);
   const [started, setStarted] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     onHasResultsChange?.(started);
   }, [started, onHasResultsChange]);
 
-  async function runCompare(a: string, b: string) {
+  const runCompare = useCallback(async (a: string, b: string) => {
     if (!a && !b) {
       setStatus("error");
       setErrorMessage("Paste at least one Polymarket or Kalshi market link.");
@@ -124,7 +132,13 @@ export function PasteForm({
     } finally {
       setLoadingLabel(null);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    if (!sharedParams.left) return;
+    const timer = setTimeout(() => void runCompare(sharedParams.left, sharedParams.right), 0);
+    return () => clearTimeout(timer);
+  }, [sharedParams, runCompare]);
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -189,6 +203,24 @@ export function PasteForm({
     setRight(swapSlot(right, option));
   }
 
+  async function handleShare() {
+    if (!left || !right) return;
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.searchParams.set("left", left.market.sourceUrl);
+    url.searchParams.set("right", right.market.sourceUrl);
+    const shareUrl = url.toString();
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+    } catch {
+      window.prompt("Copy this link:", shareUrl);
+      return;
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
   const isLoading = status === "loading";
   const showExamples = !started;
 
@@ -216,6 +248,12 @@ export function PasteForm({
               : "Paste one link and we'll suggest the closest match on the other platform, or paste both for a direct comparison."}
           </p>
           <div className="flex shrink-0 items-center gap-2">
+            {left && right ? (
+              <Button type="button" variant="ghost" size="default" onClick={handleShare}>
+                {copied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+                {copied ? "Copied" : "Share"}
+              </Button>
+            ) : null}
             {started ? (
               <Button type="button" variant="ghost" size="default" onClick={handleReset}>
                 <RotateCcw className="h-4 w-4" />

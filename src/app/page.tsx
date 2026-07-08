@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import { PasteForm } from "@/components/paste-form";
 import { cn } from "@/lib/utils";
@@ -48,7 +48,9 @@ export default function Home() {
       </header>
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
-        <PasteForm onHasResultsChange={setHasResults} />
+        <Suspense fallback={null}>
+          <PasteForm onHasResultsChange={setHasResults} />
+        </Suspense>
       </main>
 
       <footer className="border-t border-edge px-6 py-6 text-center text-xs text-muted">
