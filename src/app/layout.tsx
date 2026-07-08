@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 const SITE_URL = "https://polycomparison.app";
-const SITE_TITLE = "PolyComparison — Polymarket vs Kalshi Explorer";
+const SITE_TITLE = "PolyComparison — Look Up Polymarket vs Kalshi Odds";
 const SITE_DESCRIPTION =
-  "Paste a Polymarket or Kalshi market link and get an instant side-by-side comparison of price, volume, and liquidity across both platforms.";
+  "Paste a market link and instantly see how Polymarket and Kalshi price the same event — probability gaps, volume, and which platform has the better odds, at a glance.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
   },
