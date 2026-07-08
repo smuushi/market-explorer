@@ -17,6 +17,7 @@ export const MarketSchema = z.object({
   id: z.string(),
   title: z.string(),
   groupTitle: z.string().nullable(),
+  optionLabel: z.string().nullable(),
   sourceUrl: z.string(),
   yesProbability: z.number().min(0).max(1).nullable(),
   noProbability: z.number().min(0).max(1).nullable(),

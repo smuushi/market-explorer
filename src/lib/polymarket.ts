@@ -30,7 +30,7 @@ interface GammaMarketRaw {
   active?: boolean;
   closed?: boolean;
   description?: string;
-  groupItemTitle?: string;
+  groupItemTitle?: string | null;
   events?: GammaEventRef[];
 }
 
@@ -130,6 +130,7 @@ async function normalizeMarket(
     id: `polymarket-${raw.id}`,
     title: raw.question,
     groupTitle: parentEvent?.title ?? null,
+    optionLabel: raw.groupItemTitle || null,
     sourceUrl,
     yesProbability,
     noProbability,

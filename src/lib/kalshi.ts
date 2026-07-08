@@ -56,7 +56,16 @@ async function fetchJson<T>(url: string): Promise<T | null> {
   }
 }
 
-export function parseKalshiUrl(url: string): string[] | null {
+export interface ParsedKalshiUrl {
+  /** Values to try directly as a market ticker or event ticker, in priority order. */
+  tickerCandidates: string[];
+  /** The URL segment that Kalshi uses as a series ticker, e.g. /markets/{series}/... */
+  seriesCandidate: string | null;
+  /** Human-readable words from the URL slug, used to disambiguate which event to pick. */
+  slugHint: string;
+}
+
+export function parseKalshiUrl(url: string): ParsedKalshiUrl | null {
   let parsed: URL;
   try {
     parsed = new URL(url);
@@ -68,10 +77,19 @@ export function parseKalshiUrl(url: string): string[] | null {
   const segments = parsed.pathname.split("/").filter(Boolean);
   if (segments[0] !== "markets" || segments.length < 2) return null;
 
-  const candidates = [segments[segments.length - 1], segments[1]].map((segment) =>
-    segment.toUpperCase(),
+  const hashTicker = parsed.hash.replace(/^#/, "");
+  const lastSegment = segments[segments.length - 1];
+  const seriesSegment = segments[1];
+
+  const tickerCandidates = Array.from(
+    new Set([hashTicker, lastSegment, seriesSegment].filter(Boolean).map((s) => s.toUpperCase())),
   );
-  return Array.from(new Set(candidates));
+
+  return {
+    tickerCandidates,
+    seriesCandidate: seriesSegment ? seriesSegment.toUpperCase() : null,
+    slugHint: segments.slice(2).join(" ").replace(/-/g, " "),
+  };
 }
 
 async function fetchMarketByTicker(ticker: string): Promise<KalshiMarketRaw | null> {
@@ -149,6 +167,7 @@ async function normalizeMarket(
     id: `kalshi-${raw.ticker}`,
     title: raw.title,
     groupTitle: event?.title ?? null,
+    optionLabel: raw.yes_sub_title || null,
     sourceUrl: `https://kalshi.com/markets/${raw.ticker}`,
     yesProbability,
     noProbability,
@@ -191,13 +210,34 @@ export interface KalshiResolution {
   alternates: Market[];
 }
 
+function pickBestEvent(events: KalshiEventRaw[], slugHint: string): KalshiEventRaw {
+  if (!slugHint.trim()) return events[0];
+  return [...events].sort(
+    (a, b) => titleSimilarity(slugHint, b.title) - titleSimilarity(slugHint, a.title),
+  )[0];
+}
+
+async function resolveFromEventMarkets(
+  event: KalshiEventRaw,
+  markets: KalshiMarketRaw[],
+): Promise<KalshiResolution> {
+  const primaryRaw = pickPrimaryMarket(markets);
+  const alternateRaws = markets.filter((m) => m.ticker !== primaryRaw.ticker).slice(0, 9);
+
+  const [market, alternates] = await Promise.all([
+    normalizeMarket(primaryRaw, event),
+    Promise.all(alternateRaws.map((raw) => normalizeMarket(raw, event, false))),
+  ]);
+  return { market, alternates };
+}
+
 export async function resolveKalshiUrl(url: string): Promise<KalshiResolution> {
-  const candidates = parseKalshiUrl(url);
-  if (!candidates || candidates.length === 0) {
+  const parsed = parseKalshiUrl(url);
+  if (!parsed) {
     throw new MarketResolutionError("That doesn't look like a Kalshi market link.");
   }
 
-  for (const candidate of candidates) {
+  for (const candidate of parsed.tickerCandidates) {
     const directMarket = await fetchMarketByTicker(candidate);
     if (directMarket) {
       const eventResult = await fetchEventByTicker(directMarket.event_ticker);
@@ -214,20 +254,24 @@ export async function resolveKalshiUrl(url: string): Promise<KalshiResolution> {
 
     const eventResult = await fetchEventByTicker(candidate);
     if (eventResult && eventResult.markets.length > 0) {
-      const primaryRaw = pickPrimaryMarket(eventResult.markets);
-      const alternateRaws = eventResult.markets
-        .filter((m) => m.ticker !== primaryRaw.ticker)
-        .slice(0, 9);
-
-      const [market, alternates] = await Promise.all([
-        normalizeMarket(primaryRaw, eventResult.event),
-        Promise.all(alternateRaws.map((raw) => normalizeMarket(raw, eventResult.event, false))),
-      ]);
-      return { market, alternates };
+      return resolveFromEventMarkets(eventResult.event, eventResult.markets);
     }
   }
 
-  throw new MarketResolutionError(`Could not find a Kalshi market for "${candidates[0]}".`);
+  // Real kalshi.com URLs are usually /markets/{series_ticker}/{event-title-slug}, where
+  // neither path segment is an actual market or event ticker. Fall back to treating the
+  // series segment as a series ticker and searching its open events for the best match.
+  if (parsed.seriesCandidate) {
+    const events = await fetchOpenEventsForSeries(parsed.seriesCandidate, 10);
+    if (events.length > 0) {
+      const bestEvent = pickBestEvent(events, parsed.slugHint);
+      if (bestEvent.markets && bestEvent.markets.length > 0) {
+        return resolveFromEventMarkets(bestEvent, bestEvent.markets);
+      }
+    }
+  }
+
+  throw new MarketResolutionError(`Could not find a Kalshi market for "${parsed.tickerCandidates[0]}".`);
 }
 
 const CATEGORY_KEYWORDS: Record<string, string[]> = {

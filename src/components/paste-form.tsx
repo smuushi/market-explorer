@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ResolveResponseSchema, SuggestResponseSchema } from "@/lib/types";
 import type { Market } from "@/lib/types";
+import { platformLabel } from "@/lib/utils";
 
 interface Slot {
   market: Market;
@@ -161,7 +162,7 @@ export function PasteForm() {
 
       {left && left.options.length > 0 ? (
         <MarketOptionPicker
-          label="Other outcomes in this event"
+          label={`Other ${platformLabel(left.market.platform)} outcomes in this event`}
           current={left.market}
           options={left.options}
           onSelect={handleSelectLeft}
@@ -170,7 +171,11 @@ export function PasteForm() {
 
       {right && right.options.length > 0 ? (
         <MarketOptionPicker
-          label={rightMode === "auto" ? "Other suggested matches" : "Other outcomes in this event"}
+          label={
+            rightMode === "auto"
+              ? `Other suggested ${platformLabel(right.market.platform)} matches`
+              : `Other ${platformLabel(right.market.platform)} outcomes in this event`
+          }
           current={right.market}
           options={right.options}
           onSelect={handleSelectRight}
