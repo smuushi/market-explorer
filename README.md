@@ -27,6 +27,13 @@ Etherscan or CoinMarketCap page, but for prediction markets.
 
 You can also paste both links directly if you already know the exact pair you want to compare, or
 switch between outcomes when a link resolves to a multi-outcome event (e.g. "World Cup Winner").
+The comparison always ends with a one-line verdict on which platform offers the better price to
+buy Yes, not just a neutral probability gap — the point is to answer "where's the better odds?" at
+a glance.
+
+There's also a CLI sibling, [`parity-cli`](https://github.com/smuushi/parity-cli), that exposes the
+same resolve/compare/match logic as a scriptable command-line tool with a `--json` mode, built so
+an AI agent can shell out to it as easily as a person can run it in a terminal.
 
 ## Architecture
 
