@@ -1,0 +1,18 @@
+---
+description: PolyComparison project conventions and guardrails
+alwaysApply: true
+---
+
+Read and follow all instructions in `AGENTS.md` before making changes in this repository.
+
+Key points to keep top of mind:
+
+- This is a small portfolio project (an "Etherscan for prediction markets"), not a growing
+  product. Keep changes minimal and scoped to what was asked — resist adding features from the
+  README's "Roadmap" section unless explicitly requested.
+- Tailwind CSS + hand-rolled `src/components/ui/*` primitives — never ChakraUI, even if other
+  projects in your context default to it.
+- Pushing to `main` auto-deploys straight to production (`polycomparison.app`) via Vercel. Always
+  run `npm run build` and `npx tsc --noEmit` before pushing.
+- There's a sibling CLI repo, `parity-cli`, with manually-duplicated copies of the `src/lib/`
+  adapters. Flag it to the user if a matching/adapter fix here likely applies there too.

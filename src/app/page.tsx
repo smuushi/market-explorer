@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Suspense, useState } from "react";
 
 import { PasteForm } from "@/components/paste-form";
@@ -11,24 +10,13 @@ export default function Home() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="border-b border-edge">
+      <div className="border-b border-edge">
         <div
           className={cn(
             "mx-auto flex max-w-5xl flex-col gap-2 px-6 transition-[padding] duration-200",
             hasResults ? "py-5" : "py-10",
           )}
         >
-          <div className="flex items-center gap-2 text-sm font-medium text-muted">
-            <Image
-              src="/logo.png"
-              alt="PolyComparison logo"
-              width={20}
-              height={20}
-              className="rounded-md"
-              priority
-            />
-            PolyComparison
-          </div>
           <h1
             className={cn(
               "font-bold tracking-tight text-foreground transition-all duration-200",
@@ -45,27 +33,13 @@ export default function Home() {
             </p>
           )}
         </div>
-      </header>
+      </div>
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
         <Suspense fallback={null}>
           <PasteForm onHasResultsChange={setHasResults} />
         </Suspense>
       </main>
-
-      <footer className="border-t border-edge px-6 py-6 text-center text-xs text-muted">
-        Built by{" "}
-        <a
-          href="https://github.com/smuushi"
-          target="_blank"
-          rel="noreferrer"
-          className="underline underline-offset-2 hover:text-foreground"
-        >
-          Michael Shih
-        </a>{" "}
-        · Data via the public Polymarket Gamma/CLOB and Kalshi Trade APIs · Not affiliated with
-        Polymarket or Kalshi
-      </footer>
     </div>
   );
 }
