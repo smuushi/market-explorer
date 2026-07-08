@@ -71,10 +71,13 @@ guarantee:
    and a same-topic-but-different-question false positive (e.g. "will X drop out of the race" vs.
    "will X be endorsed", which share every proper noun) can score close behind it. Token overlap
    alone can't reliably tell those apart, so when the top heuristic score falls in that ambiguous
-   band, the shortlist is handed to a small model (`gpt-5.4-nano`, OpenAI) that reads the actual
-   titles and judges which candidate (if any) asks the same real-world question — only obviously
-   high-confidence matches skip the AI step entirely. If no `OPENAI_API_KEY` is configured, or the
-   call fails for any reason, matching falls back to the heuristic ranking rather than breaking.
+   band, the shortlist is handed to a small model (`gpt-5.4-mini`, OpenAI) that judges which
+   candidate (if any) is about the same underlying event — a different date/threshold on an
+   otherwise-matching event isn't grounds for rejection (the UI surfaces that gap separately via
+   the delta strip), but a different condition, action, or set of people/entities is. Only
+   obviously high-confidence matches skip the AI step entirely. If no `OPENAI_API_KEY` is
+   configured, or the call fails for any reason, matching falls back to the heuristic ranking
+   rather than breaking.
 
 The UI always shows the next-best alternatives too, so you can override the pick either way.
 
