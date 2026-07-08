@@ -16,6 +16,8 @@ import { platformLabel } from "@/lib/utils";
 
 interface Slot {
   market: Market;
+  /** Full option list for this slot, including `market` itself, in a fixed order — never
+   * reordered when the selection changes (see MarketOptionPicker). */
   options: Market[];
 }
 
@@ -102,13 +104,13 @@ export function PasteForm({
       if (a && b) {
         setLoadingLabel("Resolving both markets…");
         const [resolvedA, resolvedB] = await Promise.all([resolveUrl(a), resolveUrl(b)]);
-        setLeft({ market: resolvedA.market, options: resolvedA.alternates });
-        setRight({ market: resolvedB.market, options: resolvedB.alternates });
+        setLeft({ market: resolvedA.market, options: [resolvedA.market, ...resolvedA.alternates] });
+        setRight({ market: resolvedB.market, options: [resolvedB.market, ...resolvedB.alternates] });
         setRightMode("manual");
       } else {
         setLoadingLabel("Resolving market…");
         const resolved = await resolveUrl(a || b);
-        setLeft({ market: resolved.market, options: resolved.alternates });
+        setLeft({ market: resolved.market, options: [resolved.market, ...resolved.alternates] });
         setLoadingLabel(
           `Searching ${resolved.market.platform === "polymarket" ? "Kalshi" : "Polymarket"} for a match…`,
         );
@@ -122,7 +124,7 @@ export function PasteForm({
           );
           return;
         }
-        setRight({ market: suggestion.candidates[0], options: suggestion.candidates.slice(1) });
+        setRight({ market: suggestion.candidates[0], options: suggestion.candidates });
         setRightMode("auto");
       }
       setStatus("resolved");
@@ -163,10 +165,7 @@ export function PasteForm({
   }
 
   function swapSlot(slot: Slot, option: Market): Slot {
-    return {
-      market: option,
-      options: [slot.market, ...slot.options.filter((candidate) => candidate.id !== option.id)],
-    };
+    return { ...slot, market: option };
   }
 
   async function handleSelectLeft(option: Market) {
@@ -182,7 +181,7 @@ export function PasteForm({
       try {
         const suggestion = await suggestMatch(option);
         if (suggestion.candidates.length > 0) {
-          setRight({ market: suggestion.candidates[0], options: suggestion.candidates.slice(1) });
+          setRight({ market: suggestion.candidates[0], options: suggestion.candidates });
         } else {
           setRight(null);
           setRightMode(null);
@@ -290,7 +289,7 @@ export function PasteForm({
         </div>
       ) : null}
 
-      {left && left.options.length > 0 ? (
+      {left && left.options.length > 1 ? (
         <MarketOptionPicker
           label={`Other ${platformLabel(left.market.platform)} outcomes in this event`}
           current={left.market}
@@ -299,7 +298,7 @@ export function PasteForm({
         />
       ) : null}
 
-      {right && right.options.length > 0 ? (
+      {right && right.options.length > 1 ? (
         <MarketOptionPicker
           label={
             rightMode === "auto"

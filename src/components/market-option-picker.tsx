@@ -4,19 +4,22 @@ import type { Market } from "@/lib/types";
 interface MarketOptionPickerProps {
   label: string;
   current: Market;
+  /** Every option in this group, including the current selection, in a fixed display order
+   * that must not change when the selection changes — reordering on select is the exact
+   * "slingshot" UX bug this component previously had. */
   options: Market[];
   onSelect: (market: Market) => void;
 }
 
 export function MarketOptionPicker({ label, current, options, onSelect }: MarketOptionPickerProps) {
-  if (options.length === 0) return null;
-
   const seen = new Set<string>();
-  const all = [current, ...options].filter((option) => {
+  const all = options.filter((option) => {
     if (seen.has(option.id)) return false;
     seen.add(option.id);
     return true;
   });
+
+  if (all.length <= 1) return null;
 
   return (
     <div className="flex flex-col gap-2">
