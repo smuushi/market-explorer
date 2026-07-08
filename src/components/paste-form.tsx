@@ -110,9 +110,14 @@ export function PasteForm() {
         const suggestion = await suggestMatch(option);
         if (suggestion.candidates.length > 0) {
           setRight({ market: suggestion.candidates[0], options: suggestion.candidates.slice(1) });
+        } else {
+          setRight(null);
+          setRightMode(null);
         }
         setStatus("resolved");
       } catch {
+        setRight(null);
+        setRightMode(null);
         setStatus("resolved");
       }
     }

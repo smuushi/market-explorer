@@ -1,4 +1,4 @@
-import { titleSimilarity } from "@/lib/text";
+import { MIN_MATCH_SIMILARITY, titleSimilarity } from "@/lib/text";
 import type { Market, PricePoint } from "@/lib/types";
 import { MarketResolutionError } from "@/lib/types";
 
@@ -218,6 +218,7 @@ export async function searchPolymarketMarkets(query: string, limit = 8): Promise
 
   const ranked = flattened
     .map((entry) => ({ ...entry, score: titleSimilarity(query, entry.raw.question) }))
+    .filter((entry) => entry.score >= MIN_MATCH_SIMILARITY)
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 

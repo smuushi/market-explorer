@@ -43,6 +43,8 @@ const STOPWORDS = new Set([
   "which",
   "win",
   "wins",
+  "out",
+  "off",
 ]);
 
 export function tokenize(text: string): string[] {
@@ -52,6 +54,14 @@ export function tokenize(text: string): string[] {
     .split(/\s+/)
     .filter((token) => token.length > 1 && !STOPWORDS.has(token));
 }
+
+/**
+ * Below this Jaccard score, a cross-platform title match is treated as noise rather
+ * than a real candidate — e.g. two titles that only share one generic word. Calibrated
+ * against real examples: a genuine Fed-rate-decision match across platforms scores
+ * ~0.2, while an unrelated pair that happens to share a single word scores ~0.09.
+ */
+export const MIN_MATCH_SIMILARITY = 0.15;
 
 /** Jaccard similarity between the token sets of two strings, in [0, 1]. */
 export function titleSimilarity(a: string, b: string): number {

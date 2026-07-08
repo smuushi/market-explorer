@@ -1,4 +1,4 @@
-import { titleSimilarity } from "@/lib/text";
+import { MIN_MATCH_SIMILARITY, titleSimilarity } from "@/lib/text";
 import type { Market, PricePoint } from "@/lib/types";
 import { MarketResolutionError } from "@/lib/types";
 
@@ -275,7 +275,18 @@ export async function resolveKalshiUrl(url: string): Promise<KalshiResolution> {
 }
 
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  Elections: ["president", "election", "senate", "governor", "primary", "congress"],
+  Elections: [
+    "president",
+    "election",
+    "senate",
+    "governor",
+    "primary",
+    "congress",
+    "midterm",
+    "midterms",
+    "drop out",
+    "resign",
+  ],
   Politics: ["president", "election", "senate", "congress", "governor", "vote", "policy"],
   Crypto: ["bitcoin", "ethereum", "crypto", "btc", "eth", "solana", "token"],
   Economics: ["fed", "inflation", "cpi", "gdp", "rate", "recession", "jobs", "unemployment", "interest"],
@@ -336,6 +347,7 @@ export async function searchKalshiMarkets(title: string, limit = 8): Promise<Mar
 
   const ranked = flattened
     .map((entry) => ({ ...entry, score: titleSimilarity(title, entry.raw.title) }))
+    .filter((entry) => entry.score >= MIN_MATCH_SIMILARITY)
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 
