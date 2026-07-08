@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 import { PasteForm } from "@/components/paste-form";
@@ -18,8 +19,14 @@ export default function Home() {
           )}
         >
           <div className="flex items-center gap-2 text-sm font-medium text-muted">
-            <span className="h-1.5 w-1.5 rounded-full bg-polymarket" />
-            <span className="h-1.5 w-1.5 rounded-full bg-kalshi" />
+            <Image
+              src="/logo.png"
+              alt="Parity logo"
+              width={20}
+              height={20}
+              className="rounded-md"
+              priority
+            />
             Parity
           </div>
           <h1
